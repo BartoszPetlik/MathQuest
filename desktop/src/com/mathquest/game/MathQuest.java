@@ -13,7 +13,7 @@ public class MathQuest extends Game {
     public void create() {
         batch = new SpriteBatch();
         font = new BitmapFont();
-
+        this.setScreen(new MainMenu(this));
     }
 
     public void render() {
