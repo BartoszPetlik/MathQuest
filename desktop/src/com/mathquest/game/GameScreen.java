@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.ArrayList;
 
@@ -14,54 +15,33 @@ public class GameScreen implements Screen {
     final MathQuest game;
     final int ANIM_TIME = 20; // czas animacji
 
+    private Map map;
+
+    private int level;
+
     private Texture character, chrUp1, chrUp2, chrDown1, chrDown2, chrLeft1, chrLeft2, chrRight1, chrRight2;
-    private Texture groundTileTxt, wallTileTxt, chest;
+    private Texture groundTileTxt,wallTileTxt, chest;
+
+    private Texture groundTileTxt1, wallTileTxt1;
+    private Texture groundTileTxt2, wallTileTxt2;
+    private Texture groundTileTxt3, wallTileTxt3;
 
     private float actPosX, actPosY, prevPosX, prevPosY;
-    private float collisionPosX, getCollisionPosY;
     private boolean collisionW, collisionS, collisionA,collisionD;
     private int collisionCounter;
 
     private OrthographicCamera camera;
     private SpriteBatch batch;
-    private Rectangle characterHitBox, tileHitBox, tileHitBox1, chestHitBox;
-    private ArrayList<Rectangle> wallTiles = new ArrayList<>();
-    private ArrayList<Rectangle> groundTiles = new ArrayList<>();
+    private Rectangle characterHitBox, chestHitBox;
     private int counterA = 0;
     private int counterD = 0;
     private int counterW = 0;
     private int counterS = 0;
 
-    private final int[][] mesh = {
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
-
     public GameScreen(final MathQuest game) {
         this.game = game;
+
+        level = 1;
 
         character = new Texture(Gdx.files.internal("characterTextures/out2.png"));
         chrUp1 = new Texture(Gdx.files.internal("characterTextures/back1.png"));
@@ -73,8 +53,14 @@ public class GameScreen implements Screen {
         chrRight1 = new Texture(Gdx.files.internal("characterTextures/right1.png"));
         chrRight2 = new Texture(Gdx.files.internal("characterTextures/right2.png"));
 
-        groundTileTxt = new Texture(Gdx.files.internal("tileTextures/Tile_12.png"));
-        wallTileTxt = new Texture(Gdx.files.internal("tileTextures/Tile_36.png"));
+        groundTileTxt1 = new Texture(Gdx.files.internal("tileTextures/Swamp_Tile_12.png"));
+        wallTileTxt1 = new Texture(Gdx.files.internal("tileTextures/Swamp_Tile_31.png"));
+
+        groundTileTxt2 = new Texture(Gdx.files.internal("tileTextures/Tile_12.png"));
+        wallTileTxt2 = new Texture(Gdx.files.internal("tileTextures/Tile_36.png"));
+
+        groundTileTxt3 = new Texture(Gdx.files.internal("tileTextures/IndustrialTile_46.png"));
+        wallTileTxt3 = new Texture(Gdx.files.internal("tileTextures/IndustrialTile_25.png"));
         chest = new Texture(Gdx.files.internal("chest_closed.png"));
 
         camera = new OrthographicCamera();
@@ -97,29 +83,35 @@ public class GameScreen implements Screen {
         prevPosX = 0;
         prevPosY = 0;
 
-        for (int i = 0; i < 1024/32; i++) {
-            for (int j = 0; j < 832/32; j++) {
-                if(mesh[j][i] == 1) {
-                    wallTiles.add(new Rectangle());
-                    wallTiles.get(wallTiles.size()-1).x = i * 32;
-                    wallTiles.get(wallTiles.size()-1).y = j * 32;
-                    wallTiles.get(wallTiles.size()-1).width = 32;
-                    wallTiles.get(wallTiles.size()-1).height = 32;
-                }else {
-                    groundTiles.add(new Rectangle());
-                    groundTiles.get(groundTiles.size()-1).x = i * 32;
-                    groundTiles.get(groundTiles.size()-1).y = j * 32;
-                    groundTiles.get(groundTiles.size()-1).width = 32;
-                    groundTiles.get(groundTiles.size()-1).height = 32;
-                }
-            }
-        }
+        map = new Map(level);
 
     }
 
     @Override
     public void show() {
 
+    }
+    public void mapRender(ArrayList<Rectangle> groundTiles, ArrayList<Rectangle> wallTiles, int level) {
+        if (level == 1) {
+            groundTileTxt = groundTileTxt1;
+            wallTileTxt = wallTileTxt1;
+        }else if (level == 2) {
+            groundTileTxt = groundTileTxt2;
+            wallTileTxt = wallTileTxt2;
+            map = new Map(level);
+        }else {
+            groundTileTxt = groundTileTxt3;
+            wallTileTxt = wallTileTxt3;
+            map = new Map(level);
+        }
+
+        for (Rectangle element:map.groundTiles) {
+            batch.draw(groundTileTxt, element.x, element.y);
+        }
+
+        for (Rectangle element:map.wallTiles) {
+            batch.draw(wallTileTxt, element.x, element.y);
+        }
     }
 
     @Override
@@ -131,13 +123,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        for (Rectangle element:groundTiles) {
-            batch.draw(groundTileTxt, element.x, element.y);
-        }
-
-        for (Rectangle element:wallTiles) {
-            batch.draw(wallTileTxt, element.x, element.y);
-        }
+        mapRender(map.groundTiles, map.wallTiles, level);
 
         batch.draw(chest, chestHitBox.x, chestHitBox.y);
         batch.draw(character, characterHitBox.x, characterHitBox.y);
@@ -147,7 +133,7 @@ public class GameScreen implements Screen {
         actPosY = characterHitBox.y;
         collisionCounter = 0;
 
-        for (Rectangle element:wallTiles) {
+        for (Rectangle element:map.wallTiles) {
             if (element.overlaps(characterHitBox)) {
                 if (actPosX - prevPosX > 0) {
                     collisionD = true;
@@ -162,6 +148,12 @@ public class GameScreen implements Screen {
                 collisionCounter += 1;
                 System.out.println(collisionCounter);
             }
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.O)) {
+            level = 2;
+        }else if (Gdx.input.isKeyPressed(Input.Keys.T)) {
+            level = 3;
         }
 
         if (collisionS || collisionW || collisionD || collisionA) {

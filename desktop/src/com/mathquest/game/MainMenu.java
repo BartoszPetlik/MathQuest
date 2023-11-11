@@ -50,9 +50,9 @@ public class MainMenu implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.add(startButton).pad(30f,30f,30f,30f).row(); // Dodanie przycisku do tabeli z odstępem
+        table.add(startButton).pad(30f,30f,30f,30f).row();
         table.add(exitButton).pad(30f,30f,30f,30f).row();
-        stage.addActor(table); // Dodanie tabeli (z przyciskiem) do ekranu
+        stage.addActor(table);
 
     }
 
