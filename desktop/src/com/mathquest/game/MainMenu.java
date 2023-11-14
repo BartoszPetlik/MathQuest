@@ -14,21 +14,21 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class MainMenu implements Screen {
 
-    final MathQuest game;
+    MathQuest game;
 
     private Stage stage;
     private Skin skin;
 
     OrthographicCamera camera;
 
-    public MainMenu(final MathQuest game) {
+    public MainMenu(MathQuest game) {
         this.game = game;
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1024, 832);
+        camera.setToOrtho(false, 1024, 872);
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("level-plane/skin/level-plane-ui.json"));
+        skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
 
         TextButton startButton = new TextButton("Rozpocznij gre", skin);
         startButton.setSize(500,500);
