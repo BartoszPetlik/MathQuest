@@ -64,7 +64,7 @@ public class GameScreen implements Screen {
         chest = new Texture(Gdx.files.internal("chest_closed.png"));
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1024, 832);
+        camera.setToOrtho(false, 1024, 872);
 
         batch = new SpriteBatch();
 
@@ -129,39 +129,10 @@ public class GameScreen implements Screen {
         batch.draw(character, characterHitBox.x, characterHitBox.y);
         batch.end();
 
-        actPosX = characterHitBox.x;
-        actPosY = characterHitBox.y;
-        collisionCounter = 0;
-
-        for (Rectangle element:map.wallTiles) {
-            if (element.overlaps(characterHitBox)) {
-                if (actPosX - prevPosX > 0) {
-                    collisionD = true;
-                }else if (actPosX - prevPosX < 0) {
-                    collisionA = true;
-                }else if (actPosY - prevPosY > 0) {
-                    collisionW = true;
-                }else if (actPosY - prevPosY < 0) {
-                    collisionS = true;
-                }
-                System.out.println("kolizja");
-                collisionCounter += 1;
-                System.out.println(collisionCounter);
-            }
-        }
-
         if (Gdx.input.isKeyPressed(Input.Keys.O)) {
             level = 2;
         }else if (Gdx.input.isKeyPressed(Input.Keys.T)) {
             level = 3;
-        }
-
-        if (collisionS || collisionW || collisionD || collisionA) {
-            characterHitBox.x = prevPosX;
-            characterHitBox.y = prevPosY;
-        }else {
-            prevPosX = actPosX;
-            prevPosY = actPosY;
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -227,6 +198,35 @@ public class GameScreen implements Screen {
             } else if (counterS == 1 + 2 * ANIM_TIME) {
                 counterS = 0;
             }
+        }
+
+        actPosX = characterHitBox.x;
+        actPosY = characterHitBox.y;
+        collisionCounter = 0;
+
+        for (Rectangle element:map.wallTiles) {
+            if (element.overlaps(characterHitBox)) {
+                if (actPosX - prevPosX > 0) {
+                    collisionD = true;
+                }else if (actPosX - prevPosX < 0) {
+                    collisionA = true;
+                }else if (actPosY - prevPosY > 0) {
+                    collisionW = true;
+                }else if (actPosY - prevPosY < 0) {
+                    collisionS = true;
+                }
+                System.out.println("kolizja");
+                collisionCounter += 1;
+                System.out.println(collisionCounter);
+            }
+        }
+
+        if (collisionS || collisionW || collisionD || collisionA) {
+            characterHitBox.x = prevPosX;
+            characterHitBox.y = prevPosY;
+        }else {
+            prevPosX = actPosX;
+            prevPosY = actPosY;
         }
         if (collisionCounter == 0) {
             collisionW = false;
