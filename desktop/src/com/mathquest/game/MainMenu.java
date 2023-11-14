@@ -25,12 +25,12 @@ public class MainMenu implements Screen {
         this.game = game;
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1024, 872);
+        camera.setToOrtho(false, Const.gWidth, Const.gHeight);
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
+        skin = new Skin(Gdx.files.internal(Const.skinPath));
 
-        TextButton startButton = new TextButton("Rozpocznij gre", skin);
+        TextButton startButton = new TextButton("Rozpocznij gre", skin, Const.buttonType);
         startButton.setSize(500,500);
         startButton.addListener(new ClickListener() {
             @Override
@@ -40,7 +40,7 @@ public class MainMenu implements Screen {
             }
         });
 
-        TextButton exitButton = new TextButton("Wyjdz", skin);
+        TextButton exitButton = new TextButton("Wyjdz", skin, Const.buttonType);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

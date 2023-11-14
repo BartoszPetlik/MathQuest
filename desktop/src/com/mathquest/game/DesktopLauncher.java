@@ -8,7 +8,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		Const constant = new Const();
-		config.setWindowedMode(1024, 872);
+		config.setWindowedMode(Const.gWidth, Const.gHeight);
 		config.useVsync(true);
 		config.setResizable(false);
 		config.setTitle("MathQuest");

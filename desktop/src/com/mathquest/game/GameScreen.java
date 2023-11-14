@@ -7,13 +7,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.ArrayList;
 
 public class GameScreen implements Screen {
     final MathQuest game;
-    final int ANIM_TIME = 20; // czas animacji
 
     private Map map;
 
@@ -31,7 +29,6 @@ public class GameScreen implements Screen {
     private int collisionCounter;
 
     private OrthographicCamera camera;
-    private SpriteBatch batch;
     private Rectangle characterHitBox, chestHitBox;
     private int counterA = 0;
     private int counterD = 0;
@@ -65,8 +62,6 @@ public class GameScreen implements Screen {
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1024, 872);
-
-        batch = new SpriteBatch();
 
         characterHitBox = new Rectangle();
         characterHitBox.x = 33;
@@ -106,11 +101,11 @@ public class GameScreen implements Screen {
         }
 
         for (Rectangle element:map.groundTiles) {
-            batch.draw(groundTileTxt, element.x, element.y);
+            game.batch.draw(groundTileTxt, element.x, element.y);
         }
 
         for (Rectangle element:map.wallTiles) {
-            batch.draw(wallTileTxt, element.x, element.y);
+            game.batch.draw(wallTileTxt, element.x, element.y);
         }
     }
 
@@ -120,14 +115,14 @@ public class GameScreen implements Screen {
 
         camera.update();
 
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
 
         mapRender(map.groundTiles, map.wallTiles, level);
 
-        batch.draw(chest, chestHitBox.x, chestHitBox.y);
-        batch.draw(character, characterHitBox.x, characterHitBox.y);
-        batch.end();
+        game.batch.draw(chest, chestHitBox.x, chestHitBox.y);
+        game.batch.draw(character, characterHitBox.x, characterHitBox.y);
+        game.batch.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.O)) {
             level = 2;
@@ -145,9 +140,9 @@ public class GameScreen implements Screen {
             counterA += 1;
             if (counterA == 1) {
                 character = chrLeft1;
-            }else if (counterA == 1 + ANIM_TIME){
+            }else if (counterA == 1 + Const.ANIM_TIME){
                 character = chrLeft2;
-            }else if (counterA == 1 + 2*ANIM_TIME) {
+            }else if (counterA == 1 + 2*Const.ANIM_TIME) {
                 counterA = 0;
             }
         }
@@ -161,9 +156,9 @@ public class GameScreen implements Screen {
             counterD += 1;
             if (counterD == 1) {
                 character = chrRight1;
-            } else if (counterD == 1 + ANIM_TIME) {
+            } else if (counterD == 1 + Const.ANIM_TIME) {
                 character = chrRight2;
-            } else if (counterD == 1 + 2 * ANIM_TIME) {
+            } else if (counterD == 1 + 2 * Const.ANIM_TIME) {
                 counterD = 0;
             }
         }
@@ -177,9 +172,9 @@ public class GameScreen implements Screen {
             counterW += 1;
             if (counterW == 1) {
                 character = chrUp1;
-            } else if (counterW == 1 + ANIM_TIME) {
+            } else if (counterW == 1 + Const.ANIM_TIME) {
                 character = chrUp2;
-            } else if (counterW == 1 + 2 * ANIM_TIME) {
+            } else if (counterW == 1 + 2 * Const.ANIM_TIME) {
                 counterW = 0;
             }
         }
@@ -193,9 +188,9 @@ public class GameScreen implements Screen {
             counterS += 1;
             if (counterS == 1) {
                 character = chrDown1;
-            } else if (counterS == 1 + ANIM_TIME) {
+            } else if (counterS == 1 + Const.ANIM_TIME) {
                 character = chrDown2;
-            } else if (counterS == 1 + 2 * ANIM_TIME) {
+            } else if (counterS == 1 + 2 * Const.ANIM_TIME) {
                 counterS = 0;
             }
         }
@@ -267,7 +262,7 @@ public class GameScreen implements Screen {
         chrLeft2.dispose();
         chrRight1.dispose();
         chrRight2.dispose();
-        batch.dispose();
+        game.batch.dispose();
         chest.dispose();
         groundTileTxt.dispose();
         wallTileTxt.dispose();
