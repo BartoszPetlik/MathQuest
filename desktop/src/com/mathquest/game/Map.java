@@ -101,9 +101,11 @@ public class Map {
         }else {
             mesh = mesh3;
         }
-
-        for (int i = 0; i < 1024/32; i++) {
-            for (int j = 0; j < 832/32; j++) {
+        generateMapStruct();
+    }
+    private void generateMapStruct() {
+        for (int i = 0; i < Const.gWidth/32; i++) {
+            for (int j = 0; j < (Const.gHeight - Const.barHeight)/32; j++) {
                 if(mesh[j][i] == 1) {
                     wallTiles.add(new Rectangle());
                     wallTiles.get(wallTiles.size()-1).x = i * 32;

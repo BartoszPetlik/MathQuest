@@ -99,5 +99,6 @@ public class MainMenu implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+
     }
 }

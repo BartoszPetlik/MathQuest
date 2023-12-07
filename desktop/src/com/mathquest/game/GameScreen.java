@@ -5,10 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
-import java.util.ArrayList;
 
 public class GameScreen implements Screen {
     final MathQuest game;
@@ -61,7 +59,7 @@ public class GameScreen implements Screen {
         chest = new Texture(Gdx.files.internal("chest_closed.png"));
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1024, 872);
+        camera.setToOrtho(false, Const.gWidth, Const.gHeight);
 
         characterHitBox = new Rectangle();
         characterHitBox.x = 33;
@@ -86,7 +84,7 @@ public class GameScreen implements Screen {
     public void show() {
 
     }
-    public void mapRender(ArrayList<Rectangle> groundTiles, ArrayList<Rectangle> wallTiles, int level) {
+    public void mapRender(int level) {
         if (level == 1) {
             groundTileTxt = groundTileTxt1;
             wallTileTxt = wallTileTxt1;
@@ -118,7 +116,7 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        mapRender(map.groundTiles, map.wallTiles, level);
+        mapRender(level);
 
         game.batch.draw(chest, chestHitBox.x, chestHitBox.y);
         game.batch.draw(character, characterHitBox.x, characterHitBox.y);
@@ -130,6 +128,11 @@ public class GameScreen implements Screen {
             level = 3;
         }
 
+        move();
+        checkCollision();
+    }
+
+    private void move() {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             counterD = 0;
             counterS = 0;
@@ -163,9 +166,9 @@ public class GameScreen implements Screen {
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            counterD = 0;
-            counterA = 0;
             counterS = 0;
+            counterA = 0;
+            counterD = 0;
             if (!collisionW) {
                 characterHitBox.y += 200 * Gdx.graphics.getDeltaTime();
             }
@@ -179,9 +182,9 @@ public class GameScreen implements Screen {
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            counterD = 0;
-            counterA = 0;
             counterW = 0;
+            counterA = 0;
+            counterD = 0;
             if (!collisionS) {
                 characterHitBox.y -= 200 * Gdx.graphics.getDeltaTime();
             }
@@ -194,7 +197,9 @@ public class GameScreen implements Screen {
                 counterS = 0;
             }
         }
+    }
 
+    private void checkCollision() {
         actPosX = characterHitBox.x;
         actPosY = characterHitBox.y;
         collisionCounter = 0;
@@ -210,9 +215,9 @@ public class GameScreen implements Screen {
                 }else if (actPosY - prevPosY < 0) {
                     collisionS = true;
                 }
-                System.out.println("kolizja");
+                //System.out.println("kolizja");
                 collisionCounter += 1;
-                System.out.println(collisionCounter);
+                //System.out.println(collisionCounter);
             }
         }
 
