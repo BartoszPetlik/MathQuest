@@ -1,7 +1,6 @@
 package com.mathquest.game;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class MathQuest extends Game {
@@ -9,7 +8,8 @@ public class MathQuest extends Game {
 
     public void create() {
         batch = new SpriteBatch();
-        this.setScreen(new MainMenu(this));
+        //this.setScreen(new MainMenu(this));
+        this.setScreen(new GameScreen(this));
     }
 
     public void render() {

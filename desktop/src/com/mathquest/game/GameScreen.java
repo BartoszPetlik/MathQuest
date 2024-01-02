@@ -5,15 +5,37 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import java.util.ArrayList;
 
 public class GameScreen implements Screen {
     final MathQuest game;
 
+    Skin skin;
+
     private Map map;
 
     private int level;
+    Stage stage, hudStage;
+    Table table;
+    private long actTime, startTime;
+    private int actKeys;
+    private int gameTime;
+    String keyString, levelString, timeString;
+    Label keyLabel, levelLabel, timeLabel;
+
+    Quest quest;
+
+    private boolean activeQuest;
 
     private Texture character, chrUp1, chrUp2, chrDown1, chrDown2, chrLeft1, chrLeft2, chrRight1, chrRight2;
     private Texture groundTileTxt,wallTileTxt, chest;
@@ -37,6 +59,31 @@ public class GameScreen implements Screen {
         this.game = game;
 
         level = 1;
+        activeQuest = false;
+
+        startTime = TimeUtils.millis();
+
+        stage = new Stage(new ScreenViewport());
+        hudStage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(hudStage);
+        table = new Table();
+        table.setFillParent(true);
+        table.top();
+        table.padTop(7);
+        skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
+        keyLabel = new Label("Klucze: 0/3", skin,"title-plain");
+        levelLabel = new Label("Poziom: 1", skin,"title-plain");
+        timeLabel = new Label("Czas: 0", skin,"title-plain");
+        table.add(keyLabel).expandX().width(341).padLeft(230);
+        table.add(levelLabel).expandX().width(331);
+        table.add(timeLabel).expandX().width(321);
+
+        hudStage.addActor(table);
+
+
+        Gdx.input.setInputProcessor(stage);
+
+        quest = new Quest(stage);
 
         character = new Texture(Gdx.files.internal("characterTextures/out2.png"));
         chrUp1 = new Texture(Gdx.files.internal("characterTextures/back1.png"));
@@ -59,7 +106,7 @@ public class GameScreen implements Screen {
         chest = new Texture(Gdx.files.internal("chest_closed.png"));
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, Const.gWidth, Const.gHeight);
+        camera.setToOrtho(false, 1024, 872);
 
         characterHitBox = new Rectangle();
         characterHitBox.x = 33;
@@ -70,8 +117,8 @@ public class GameScreen implements Screen {
         chestHitBox = new Rectangle();
         chestHitBox.x = 485;
         chestHitBox.y = 325;
-        chestHitBox.width = 32;
-        chestHitBox.height = 32;
+        chestHitBox.width = 64;
+        chestHitBox.height = 48;
 
         prevPosX = 0;
         prevPosY = 0;
@@ -84,7 +131,7 @@ public class GameScreen implements Screen {
     public void show() {
 
     }
-    public void mapRender(int level) {
+    public void mapRender(ArrayList<Rectangle> groundTiles, ArrayList<Rectangle> wallTiles, int level) {
         if (level == 1) {
             groundTileTxt = groundTileTxt1;
             wallTileTxt = wallTileTxt1;
@@ -116,23 +163,37 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        mapRender(level);
+        mapRender(map.groundTiles, map.wallTiles, level);
 
         game.batch.draw(chest, chestHitBox.x, chestHitBox.y);
         game.batch.draw(character, characterHitBox.x, characterHitBox.y);
         game.batch.end();
+// HUD -------------------------------------------------------------
+        actTime = TimeUtils.millis();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.O)) {
+        gameTime = (int) ((actTime - startTime)/1000);
+        timeString = "Czas: " + gameTime;
+        timeLabel.setText(timeString);
+
+        levelString = "Poziom: " + level;
+        levelLabel.setText(levelString);
+
+        keyString = "Klucze: " + actKeys + "/" + level;
+        keyLabel.setText(keyString);
+
+        hudStage.act(Gdx.graphics.getDeltaTime());
+        hudStage.draw();
+//Map choice --------------------------------------------------------------
+        if (actKeys == 1 && level == 1) {
             level = 2;
-        }else if (Gdx.input.isKeyPressed(Input.Keys.T)) {
+            actKeys = 0;
+        }else if (actKeys == 2 && level == 2) {
             level = 3;
+            actKeys = 0;
+        }else if (actKeys == 3) {
+
         }
-
-        move();
-        checkCollision();
-    }
-
-    private void move() {
+//Movement ---------------------------------------------------------
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             counterD = 0;
             counterS = 0;
@@ -166,9 +227,9 @@ public class GameScreen implements Screen {
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            counterS = 0;
-            counterA = 0;
             counterD = 0;
+            counterA = 0;
+            counterS = 0;
             if (!collisionW) {
                 characterHitBox.y += 200 * Gdx.graphics.getDeltaTime();
             }
@@ -182,9 +243,9 @@ public class GameScreen implements Screen {
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            counterW = 0;
-            counterA = 0;
             counterD = 0;
+            counterA = 0;
+            counterW = 0;
             if (!collisionS) {
                 characterHitBox.y -= 200 * Gdx.graphics.getDeltaTime();
             }
@@ -197,15 +258,13 @@ public class GameScreen implements Screen {
                 counterS = 0;
             }
         }
-    }
-
-    private void checkCollision() {
+//Collision detection -----------------------------------------------------------
         actPosX = characterHitBox.x;
         actPosY = characterHitBox.y;
         collisionCounter = 0;
 
         for (Rectangle element:map.wallTiles) {
-            if (element.overlaps(characterHitBox)) {
+            if (element.overlaps(characterHitBox) || chestHitBox.overlaps(characterHitBox)) {
                 if (actPosX - prevPosX > 0) {
                     collisionD = true;
                 }else if (actPosX - prevPosX < 0) {
@@ -215,9 +274,9 @@ public class GameScreen implements Screen {
                 }else if (actPosY - prevPosY < 0) {
                     collisionS = true;
                 }
-                //System.out.println("kolizja");
+                System.out.println("kolizja");
                 collisionCounter += 1;
-                //System.out.println(collisionCounter);
+                System.out.println(collisionCounter);
             }
         }
 
@@ -234,6 +293,24 @@ public class GameScreen implements Screen {
             collisionD = false;
             collisionS = false;
         }
+
+
+
+        if (Gdx.input.isKeyPressed(Input.Keys.Q) && activeQuest == false || quest.again == true) {
+            quest = new Quest(stage);
+            quest.operation();
+            activeQuest = true;
+        }
+
+        if (quest.status) {
+            activeQuest = false;
+            actKeys += 1;
+            quest.status = false;
+        }
+
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
     }
 
     @Override
@@ -271,5 +348,6 @@ public class GameScreen implements Screen {
         chest.dispose();
         groundTileTxt.dispose();
         wallTileTxt.dispose();
+        stage.dispose();
     }
 }
