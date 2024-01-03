@@ -190,8 +190,6 @@ public class Quest {
                 questDialog.remove();
 
                 if (tryAgain == true) {
-                    //Quest quest = new Quest(stage);
-                    //quest.operation();
                     again = true;
                 }else {
                     status = true;
