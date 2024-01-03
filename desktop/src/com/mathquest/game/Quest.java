@@ -27,6 +27,8 @@ public class Quest {
         this.stage = stage;
         skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
         random = new Random();
+
+        Gdx.input.setCursorCatched(false);
         questDialog = new Dialog("Quest", skin) {
             @Override
             public float getPrefWidth() {
@@ -132,7 +134,7 @@ public class Quest {
                 questDialog.remove();
 
 
-                label1 = new Label("Twoja odpowiedz jest prawidlowa!", skin, "title-plain");
+                label1 = new Label("Twoja odpowiedz jest poprawna!", skin, "title-plain");
                 label2 = new Label("Zdobywasz 1 klucz!", skin, "title-plain");
                 questAnswer(label1, label2, false);
             }
@@ -144,7 +146,7 @@ public class Quest {
                 questDialog.hide();
                 questDialog.remove();
 
-                label1 = new Label("Twoja odpowiedz jest nieprawidlowa!", skin, "title-plain");
+                label1 = new Label("Twoja odpowiedz nie jest poprawna!", skin, "title-plain");
                 label2 = new Label("Sprobuj ponownie!", skin, "title-plain");
                 questAnswer(label1, label2, true);
             }

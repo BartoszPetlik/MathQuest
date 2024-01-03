@@ -12,6 +12,7 @@ public class DesktopLauncher {
 		config.useVsync(true);
 		config.setResizable(false);
 		config.setTitle("MathQuest");
+		//config.setDecorated(false);
 		new Lwjgl3Application(new MathQuest(), config);
 	}
 }

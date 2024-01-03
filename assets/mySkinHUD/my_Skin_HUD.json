@@ -1,0 +1,20 @@
+{
+"com.badlogic.gdx.graphics.g2d.BitmapFont": {
+	"RifficFree-Bold1": {
+		"file": "RifficFree-Bold(1).fnt",
+		"scaledSize": -1,
+		"markupEnabled": false,
+		"flip": false
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+	"default": {
+		"font": "RifficFree-Bold1"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle": {
+	"default": {
+		"label": "default"
+	}
+}
+}

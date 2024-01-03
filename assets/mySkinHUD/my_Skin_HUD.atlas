@@ -1,0 +1,13 @@
+
+my_Skin_HUD.png
+size: 512, 512
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+RifficFree-Bold(1)
+  rotate: false
+  xy: 1, 358
+  size: 506, 147
+  orig: 506, 147
+  offset: 0, 0
+  index: -1

@@ -8,8 +8,8 @@ public class MathQuest extends Game {
 
     public void create() {
         batch = new SpriteBatch();
-        //this.setScreen(new MainMenu(this));
-        this.setScreen(new GameScreen(this));
+        this.setScreen(new MainMenu(this));
+        //this.setScreen(new GameScreen(this));
     }
 
     public void render() {

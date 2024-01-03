@@ -4,13 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -20,13 +21,14 @@ import java.util.ArrayList;
 public class GameScreen implements Screen {
     final MathQuest game;
 
-    Skin skin;
+    Skin skin, mySkin;
 
     private Map map;
 
     private int level;
     Stage stage, hudStage;
     Table table;
+    Dialog dialog;
     private long actTime, startTime;
     private int actKeys, correctAnswers, wrongAnswers;
     private int gameTime;
@@ -35,15 +37,17 @@ public class GameScreen implements Screen {
 
     Quest quest;
 
+    private boolean activeDialog;
+
     private int i, chestNumber;
 
-    private boolean activeQuest;
+    private boolean activeQuest, nextLevel;
     private ArrayList<Rectangle> chests = new ArrayList<>();
     private ArrayList<Rectangle> chestsArea = new ArrayList<>();
     private ArrayList<Boolean> isOpen = new ArrayList<>();
     private Texture character, chrUp1, chrUp2, chrDown1, chrDown2, chrLeft1, chrLeft2, chrRight1, chrRight2;
     private Texture basicCharacter;
-    private Texture groundTileTxt,wallTileTxt, chestClosed, chestOpened, chestTxt;
+    private Texture groundTileTxt,wallTileTxt, chestClosed, chestOpen, chestTxt;
 
     private Texture groundTileTxt1, wallTileTxt1;
     private Texture groundTileTxt2, wallTileTxt2;
@@ -77,12 +81,13 @@ public class GameScreen implements Screen {
         table.top();
         table.padTop(7);
         skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
-        keyLabel = new Label("Klucze: 0/3", skin,"title-plain");
-        levelLabel = new Label("Poziom: 1", skin,"title-plain");
-        timeLabel = new Label("Czas: 0", skin,"title-plain");
+        mySkin = new Skin(Gdx.files.internal("mySkinHUD/my_Skin_HUD.json"));
+        keyLabel = new Label("Klucze: 0/3", mySkin);
+        levelLabel = new Label("Poziom: 1", mySkin);
+        timeLabel = new Label("Czas: 0", mySkin);
         table.add(keyLabel).expandX().width(341).padLeft(230);
-        table.add(levelLabel).expandX().width(331);
-        table.add(timeLabel).expandX().width(321);
+        table.add(levelLabel).expandX().width(321);
+        table.add(timeLabel).expandX().width(331);
 
         hudStage.addActor(table);
 //-------------------------------------------------------------------------------------
@@ -91,6 +96,7 @@ public class GameScreen implements Screen {
 
         quest = new Quest(stage);
 //Txt load
+
         basicCharacter = new Texture(Gdx.files.internal("characterTextures/out2.png"));
         character = basicCharacter;
         chrUp1 = new Texture(Gdx.files.internal("characterTextures/back1.png"));
@@ -111,11 +117,13 @@ public class GameScreen implements Screen {
         groundTileTxt3 = new Texture(Gdx.files.internal("tileTextures/IndustrialTile_46.png"));
         wallTileTxt3 = new Texture(Gdx.files.internal("tileTextures/IndustrialTile_25.png"));
         chestClosed = new Texture(Gdx.files.internal("chest_closed.png"));
-        chestOpened = new Texture(Gdx.files.internal("Chest_opened.png"));
+        chestOpen = new Texture(Gdx.files.internal("Chest_open.png"));
 //----------------------------------------------------------------------------------------------------
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1024, 872);
+
+        Gdx.input.setCursorCatched(true);
 
         characterHitBox = new Rectangle();
         characterHitBox.x = 33;
@@ -188,6 +196,30 @@ public class GameScreen implements Screen {
         chestsArea.get(number).y = chests.get(number).y - 32;
     }
 
+    private void dispLevelMsg () {
+        activeDialog = true;
+        newDialog("Informacja", 500, 300);
+
+        table.add(new Label("Gratulacje!", skin, "title-plain")).padBottom(30).row();
+        table.add(new Label("Przechodzisz do kolejnego poziomu!", skin, "title-plain")).padBottom(30).row();
+        TextButton okButton = new TextButton("Ok", skin,"round");
+
+        dialog.button(okButton, true);
+
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                dialog.remove();
+                activeDialog = false;
+                nextLevel = true;
+                Gdx.input.setCursorCatched(true);
+            }
+        });
+
+        dialog.show(stage);
+    }
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0.2f, 1);
@@ -203,7 +235,7 @@ public class GameScreen implements Screen {
 
         for (Rectangle element:chests) {
             if (isOpen.get(i) == true) {
-                chestTxt = chestOpened;
+                chestTxt = chestOpen;
             }else {
                 chestTxt = chestClosed;
             }
@@ -295,6 +327,39 @@ public class GameScreen implements Screen {
                 counterS = 0;
             }
         }
+//Exit ------------------------------------------------------------------------------------
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE) && activeDialog == false) {
+            activeDialog = true;
+            newDialog("", 550, 300);
+
+            table.add(new Label("Czy na pewno chcesz wyjsc do menu?", skin, "title-plain"));
+
+
+            TextButton yesButton = new TextButton("Tak", skin,"round");
+            TextButton noButton = new TextButton("Nie", skin,"round");
+
+            dialog.button(yesButton, true);
+            dialog.button(noButton, true);
+
+            yesButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    dialog.hide();
+                    dialog.remove();
+                    game.setScreen(new MainMenu(game));
+                }
+            });
+            noButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    dialog.hide();
+                    dialog.remove();
+                    activeDialog = false;
+                    Gdx.input.setCursorCatched(true);
+                }
+            });
+            dialog.show(stage);
+        }
 //Collision detection -----------------------------------------------------------
         actPosX = characterHitBox.x;
         actPosY = characterHitBox.y;
@@ -311,9 +376,7 @@ public class GameScreen implements Screen {
                 }else if (actPosY - prevPosY < 0) {
                     collisionS = true;
                 }
-                System.out.println("kolizja");
                 collisionCounter += 1;
-                System.out.println(collisionCounter);
             }
         }
         for (Rectangle element:chests) {
@@ -367,15 +430,18 @@ public class GameScreen implements Screen {
             quest.status = false;
             isOpen.set(chestNumber, true);
             correctAnswers += 1;
+            Gdx.input.setCursorCatched(true);
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
 //------------------------------------------------------------------------------------------------------------
+
 //Map choice --------------------------------------------------------------
-        if (actKeys == 1 && level == 1) {
+        if (actKeys == 1 && level == 1 && nextLevel == true) {
             level = 2;
             actKeys = 0;
+            nextLevel = false;
 
             characterHitBox.x = 700;
             characterHitBox.y = 590;
@@ -388,9 +454,10 @@ public class GameScreen implements Screen {
             for (int i = 0; i < 3; i++) {
                 isOpen.set(i, false);
             }
-        }else if (actKeys == 2 && level == 2) {
+        }else if (actKeys == 2 && level == 2 && nextLevel == true) {
             level = 3;
             actKeys = 0;
+            nextLevel = false;
 
             characterHitBox.x = 700;
             characterHitBox.y = 40;
@@ -404,10 +471,90 @@ public class GameScreen implements Screen {
             for (int i = 0; i < 3; i++) {
                 isOpen.set(i, false);
             }
-        }else if (actKeys == 3) {
-            System.out.println(correctAnswers);
-            System.out.println(wrongAnswers);
+        }else if (actKeys == 3 && level == 3 && activeDialog == false) {
+            nextLevel = false;
+            activeDialog = true;
+
+            newDialog("Informacja", 500, 300);
+
+            table.add(new Label("To jest ostatni poziom!", skin, "title-plain")).padBottom(30).row();
+            table.add(new Label("Gratulacje!", skin, "title-plain")).padBottom(30).row();
+
+            TextButton button = new TextButton("Podsumowanie", skin,"round");
+
+            dialog.button(button, true);
+
+            button.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    dialog.hide();
+                    dialog.remove();
+                    activeDialog = false;
+                    Gdx.input.setCursorCatched(true);
+
+                    newDialog("Podsumowanie",550,400);
+
+                    String time;
+                    String total;
+                    String correct;
+                    String wrong;
+
+                    int totalAnswers = correctAnswers + wrongAnswers;
+
+                    time = "Czas rozgrywki: " + gameTime + " sekund";
+                    total = "Liczba wszystkich odpowiedzi: " + totalAnswers;
+                    correct = "Liczba poprawnych odpowiedzi: " + correctAnswers;
+                    wrong = "Liczba niepoprawnych odpowiedzi: " + wrongAnswers;
+
+                    table.add(new Label(time, skin, "title-plain")).padBottom(30).row();
+                    table.add(new Label(total, skin, "title-plain")).padBottom(30).row();
+                    table.add(new Label(correct, skin, "title-plain")).padBottom(30).row();
+                    table.add(new Label(wrong, skin, "title-plain")).padBottom(30).row();
+
+                    TextButton button = new TextButton("Koniec", skin,"round");
+
+                    dialog.button(button, true);
+
+                    button.addListener(new ClickListener() {
+                        @Override
+                        public void clicked(InputEvent event, float x, float y) {
+                            dialog.hide();
+                            dialog.remove();
+                            activeDialog = false;
+                            game.setScreen(new MainMenu(game));
+                        }
+                    });
+
+                    dialog.show(stage);
+                }
+            });
+
+            dialog.show(stage);
         }
+// Level info -----------------------------------------------------------------------------------------------
+        if (((actKeys == 1 && level == 1) || (actKeys == 2 && level == 2)) && activeDialog == false) {
+            dispLevelMsg();
+        }
+    }
+
+    public void newDialog(String title, int width, int height) {
+        activeDialog = true;
+        dialog = new Dialog(title, skin) {
+            @Override
+            public float getPrefWidth() {
+                return width;
+            }
+
+            @Override
+            public float getPrefHeight() {
+                return height;
+            }
+        };
+        Gdx.input.setCursorCatched(false);
+
+        table = new Table();
+        table.center();
+        dialog.getContentTable().add(table);
     }
 
     @Override
@@ -447,7 +594,7 @@ public class GameScreen implements Screen {
         wallTileTxt.dispose();
         stage.dispose();
         hudStage.dispose();
-        chestOpened.dispose();
+        chestOpen.dispose();
         chestTxt.dispose();
     }
 }
