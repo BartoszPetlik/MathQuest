@@ -9,101 +9,140 @@ import com.badlogic.gdx.utils.Align;
 
 import java.util.Random;
 
+/**
+ * Klasa reprezentująca pytanie matematyczne w grze.
+ * Generuje losowe pytania dotyczące dodawania, odejmowania, mnożenia lub dzielenia.
+ * Użytkownik może udzielić odpowiedzi na pytanie i zdobyć klucze w grze.
+ */
 public class Quest {
+    /** * Skóra interfejsu graficznego używana do stylizacji elementów UI.*/
     Skin skin;
+    /** * Generator liczb losowych*/
     Random random;
+    /** * Liczba kluczy zdobytych przez użytkownika*/
     int keys;
-    Label question,equation;
+    /** * Etykieta do wyświetlania pytania*/
+    Label question;
+    /** * Etykieta do wyświetlania równania*/
+    Label equation;
+    /** * Dodatkowa etykieta do wyświetlania komunikatu*/
     Label label1, label2;
-    int number1, number2, type;
-    int wrongAnswer, correctAnswer;
+    /** * Jedna z losowanych liczb do zadania*/
+    int number1, number2;
+    /** * Typ operacji matematycznej (dodawanie, dzielenie, ..)*/
+    int type;
+    /** * Wartość złej odpowiedzi*/
+    int wrongAnswer;
+    /** * Wartość dobrej odpowiedzi*/
+    int correctAnswer;
+    /** * Równanie matematyczne jako tekst*/
     String equationString;
+    /** * Okno dialogowe zadania matematycznego*/
     Dialog questDialog;
+    /** *Scena, na której jest wyświetlany dialog. */
     Stage stage;
 
-    boolean status, again;
+    /** *Status odpowiedzi na pytanie matematyczne (poprawna/niepoprawna).*/
+    boolean status;
+    /** *Flaga informująca o konieczności ponownej próby udzielenia odpowiedzi.*/
+    boolean again;
+    /** *Tabela do układania elementów w oknie dialogowym.*/
     Table table;
-    public Quest (Stage stage) {
+
+    /**
+     * Konstruktor klasy Quest z określonym obiektem Stage.
+     *
+     * @param stage Scena, na której będzie wyświetlony dialog z zadaniem Quest.
+     */
+    public Quest(Stage stage) {
         this.stage = stage;
         skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
         random = new Random();
 
         Gdx.input.setCursorCatched(false);
+
         questDialog = new Dialog("Quest", skin) {
             @Override
             public float getPrefWidth() {
-                return 600;
+                return 500;
             }
 
             @Override
             public float getPrefHeight() {
-                return 400;
+                return 300;
             }
         };
     }
-    public void operation () {
+
+    /**
+     * Generuje losową operację matematyczną (dodawanie, odejmowanie, mnożenie lub dzielenie),
+     * tworzy dialog z pytaniem i pozwala użytkownikowi udzielić odpowiedzi.
+     */
+    public void operation() {
         status = false;
-        type = random.nextInt(1,5);
+        type = random.nextInt(1, 5);
 
-        if (type == 1) { //addition
-            number1 = random.nextInt(1,20);
-            number2 = random.nextInt(1,21);
+        if (type == 1) { // dodawanie
+            // Generuje losowe liczby dla dodawania
+            number1 = random.nextInt(1, 20);
+            number2 = random.nextInt(1, 21);
 
-            question = new Label("Jaki jest wynik dodawnia?",skin,"title-plain");
+            question = new Label("Jaki jest wynik dodawania?", skin, "title-plain");
             equationString = number1 + " + " + number2 + " = ?";
 
             correctAnswer = number1 + number2;
             while (true) {
-                wrongAnswer = random.nextInt(1,51);
+                wrongAnswer = random.nextInt(1, 51);
                 if (wrongAnswer != correctAnswer) {
                     break;
                 }
             }
-
-        }else if (type == 2) { //substraction
+        } else if (type == 2) { // odejmowanie
+            // Generuje losowe liczby dla odejmowania
             while (true) {
-                number1 = random.nextInt(1,20);
-                number2 = random.nextInt(1,21);
+                number1 = random.nextInt(1, 20);
+                number2 = random.nextInt(1, 21);
                 if (number1 >= number2) {
                     break;
                 }
             }
-            question = new Label("Jaki jest wynik odejmowania?",skin,"title-plain");
+            question = new Label("Jaki jest wynik odejmowania?", skin, "title-plain");
             equationString = number1 + " - " + number2 + " = ?";
 
             correctAnswer = number1 - number2;
             while (true) {
-                wrongAnswer = random.nextInt(1,51);
+                wrongAnswer = random.nextInt(1, 51);
                 if (wrongAnswer != correctAnswer) {
                     break;
                 }
             }
-        }else if (type == 3) {
-            number1 = random.nextInt(1,11);
-            number2 = random.nextInt(1,11);
+        } else if (type == 3) {
+            // Generuje losowe liczby dla mnożenia
+            number1 = random.nextInt(1, 11);
+            number2 = random.nextInt(1, 11);
 
-            question = new Label("Jaki jest wynik mnozenia?",skin,"title-plain");
+            question = new Label("Jaki jest wynik mnozenia?", skin, "title-plain");
             equationString = number1 + " * " + number2 + " = ?";
 
             correctAnswer = number1 * number2;
             while (true) {
-                wrongAnswer = random.nextInt(1,101);
+                wrongAnswer = random.nextInt(1, 101);
                 if (wrongAnswer != correctAnswer) {
                     break;
                 }
             }
-
-        }else if (type == 4) {
-            number1 = random.nextInt(1,11);
-            number2 = random.nextInt(1,11);
+        } else if (type == 4) {
+            // Generuje losowe liczby dla dzielenia
+            number1 = random.nextInt(1, 11);
+            number2 = random.nextInt(1, 11);
             int number = number1 * number2;
 
-            question = new Label("Jaki jest wynik dzielenia?",skin,"title-plain");
+            question = new Label("Jaki jest wynik dzielenia?", skin, "title-plain");
             equationString = number + " : " + number2 + " = ?";
 
             correctAnswer = number1;
             while (true) {
-                wrongAnswer = random.nextInt(1,11);
+                wrongAnswer = random.nextInt(1, 11);
                 if (wrongAnswer != correctAnswer) {
                     break;
                 }
@@ -116,23 +155,19 @@ public class Quest {
         table.center();
         questDialog.getContentTable().add(table);
 
-
-
         question.setAlignment(Align.center);
         equation.setAlignment(Align.center);
         table.add(question).padBottom(30).row();
         table.add(equation).padBottom(30).row();
 
-        TextButton wrongButton = new TextButton(String.valueOf(wrongAnswer), skin,"round");
-        TextButton correctButton = new TextButton(String.valueOf(correctAnswer), skin,"round");
+        TextButton wrongButton = new TextButton(String.valueOf(wrongAnswer), skin, "round");
+        TextButton correctButton = new TextButton(String.valueOf(correctAnswer), skin, "round");
 
         correctButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
                 questDialog.hide();
                 questDialog.remove();
-
 
                 label1 = new Label("Twoja odpowiedz jest poprawna!", skin, "title-plain");
                 label2 = new Label("Zdobywasz 1 klucz!", skin, "title-plain");
@@ -151,7 +186,8 @@ public class Quest {
                 questAnswer(label1, label2, true);
             }
         });
-        type = random.nextInt(1,3);
+
+        type = random.nextInt(1, 3);
         if (type == 1) {
             questDialog.button(wrongButton, true);
             questDialog.button(correctButton, true);
@@ -162,6 +198,13 @@ public class Quest {
         questDialog.show(stage);
     }
 
+    /**
+     * Wyświetla okno dialogwe po udzieleniu odpowiedzi na pytanie matematyczne.
+     *
+     * @param label1     Etykieta z informacją o poprawności odpowiedzi.
+     * @param label2     Etykieta z dodatkowym komunikatem.
+     * @param tryAgain   Określa, czy użytkownik powinien spróbować ponownie.
+     */
     public void questAnswer(Label label1, Label label2, boolean tryAgain) {
         questDialog = new Dialog("Quest", skin) {
             @Override
@@ -200,10 +243,6 @@ public class Quest {
             }
         });
         questDialog.button(button, true);
-
         questDialog.show(stage);
-
     }
-
-
 }
