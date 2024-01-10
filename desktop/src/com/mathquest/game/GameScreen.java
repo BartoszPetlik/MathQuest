@@ -153,7 +153,7 @@ public class GameScreen implements Screen {
         keyLabel = new Label("Klucze: 0/3", mySkin);
         levelLabel = new Label("Poziom: 1", mySkin);
         timeLabel = new Label("Czas: 0", mySkin);
-        table.add(keyLabel).expandX().width(341).padLeft(230);
+        table.add(keyLabel).expandX().width(341).padLeft(210);
         table.add(levelLabel).expandX().width(321);
         table.add(timeLabel).expandX().width(331);
 

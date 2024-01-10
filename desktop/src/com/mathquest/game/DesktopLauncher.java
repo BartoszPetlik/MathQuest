@@ -26,7 +26,7 @@ public class DesktopLauncher {
 		config.useVsync(true);
 		config.setResizable(false);
 		config.setTitle("MathQuest");
-		//config.setDecorated(false);
+		config.setDecorated(false);
 
 		// Uruchomienie gry z konfiguracją
 		new Lwjgl3Application(new MathQuest(), config);
