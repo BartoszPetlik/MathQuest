@@ -12,3 +12,9 @@ The cursor icon created on the website: https://icons8.com/
 Font RifficFree-Bold: https://blogfonts.com/riffic-free.font
 
 Character, main menu background image and tiles for maps: https://craftpix.net/
+
+
+
+https://github.com/BartoszPetlik/MathQuest/assets/149201134/53fff995-7b1c-416a-9b6d-1032980df76a
+
+
